@@ -80,3 +80,13 @@ src/
 │   └── utils.ts
 ├── hooks/
 └── types/
+
+## Contributing
+
+Contributions are welcome!
+
+Please read the [Contributing Guide](CONTRIBUTING.md) before submitting a pull request.
+
+## Support
+
+If you find this project useful, please give it a ⭐ on GitHub.
