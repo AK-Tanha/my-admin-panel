@@ -1,75 +1,82 @@
-# React + TypeScript + Vite
+# Signature Admin Panel
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, reusable admin panel starter built with **Vite + React + TypeScript + Tailwind CSS + shadcn/ui**.
 
-Currently, two official plugins are available:
+Designed to be used as a **GitHub Template** so you can start every new project with a solid admin foundation.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Clean & modern UI (shadcn/ui + Nova style)
+- Collapsible Sidebar + Header
+- Dark / Light mode
+- Authentication (Login / Register)
+- Protected Routes
+- Dashboard with stats cards
+- Users management (CRUD)
+- TanStack Query for data fetching
+- TanStack Table (sorting, filtering, pagination)
+- Form validation with Zod + React Hook Form
+- Fully typed with TypeScript
+- Ready to use as a GitHub Template
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tech Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+| Technology            | Purpose                    |
+|-----------------------|----------------------------|
+| Vite                  | Build tool                 |
+| React 19              | UI library                 |
+| TypeScript            | Type safety                |
+| Tailwind CSS v4       | Styling                    |
+| shadcn/ui (Base UI)   | Component library          |
+| React Router          | Routing                    |
+| TanStack Query        | Server state               |
+| TanStack Table        | Advanced tables            |
+| Zod + React Hook Form | Form validation            |
+| next-themes           | Dark mode                  |
+| Lucide React          | Icons                      |
+| Sonner                | Toast notifications        |
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Getting Started
 
-```
+### 1. Use this template
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Click the green **Use this template** button on GitHub,  
+or use the CLI:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+npx degit YOUR_USERNAME/my-admin-panel my-new-project
+cd my-new-project
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. Install dependencies
+Bashnpm install
+3. Start the development server
+Bashnpm run dev
+Open http://localhost:5173
 
-```
+Project Structure
+src/
+├── components/
+│   ├── layout/          # Sidebar, Header, AppLayout
+│   ├── ui/              # shadcn components
+│   └── ProtectedRoute.tsx
+├── context/
+│   └── AuthContext.tsx  # Authentication state
+├── pages/
+│   ├── Dashboard.tsx
+│   ├── Users.tsx
+│   ├── Profile.tsx
+│   ├── Login.tsx
+│   ├── Register.tsx
+│   └── ...
+├── lib/
+│   ├── api/             # Mock API functions
+│   ├── query-client.ts
+│   └── utils.ts
+├── hooks/
+└── types/

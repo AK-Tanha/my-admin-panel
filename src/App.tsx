@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { AppLayout } from "@/components/layout/AppLayout"
-import { Toaster } from "@/components/ui/toast"
+import { Toaster } from "@/components/ui/sonner"
 import Dashboard from "@/pages/Dashboard"
 import Users from "@/pages/Users"
 import Reports from "@/pages/Reports"
