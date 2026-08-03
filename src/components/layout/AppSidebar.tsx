@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
   Users,
@@ -19,18 +19,17 @@ import {
   BarChart3,
   LogOut,
   ChevronsUpDown,
-} from "lucide-react"
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+} from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useAuth } from "@/context/AuthContext"
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/context/AuthContext";
 
 const menuItems = [
   {
@@ -63,17 +62,17 @@ const menuItems = [
     url: "/profile",
     icon: Users,
   },
-]
+];
 
 export function AppSidebar() {
-  const location = useLocation()
-  const { logout, user } = useAuth()
-  const navigate = useNavigate()
+  const location = useLocation();
+  const { logout, user } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout()
-    navigate("/login")
-  }
+    logout();
+    navigate("/login");
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -135,7 +134,9 @@ export function AppSidebar() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">{user?.name || "John Doe"}</span>
+                      <span className="truncate font-semibold">
+                        {user?.name || "John Doe"}
+                      </span>
                       <span className="truncate text-xs text-muted-foreground">
                         {user?.email || "john@example.com"}
                       </span>
@@ -145,34 +146,46 @@ export function AppSidebar() {
                 }
               />
               <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                className="min-w-56 rounded-lg"
                 side="bottom"
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuLabel className="p-0 font-normal">
-                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                    <Avatar className="h-8 w-8 rounded-lg">
-                      <AvatarFallback className="rounded-lg">JD</AvatarFallback>
-                    </Avatar>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">John Doe</span>
-                      <span className="truncate text-xs text-muted-foreground">
-                        john@example.com
-                      </span>
-                    </div>
+                {/* User info (no DropdownMenuLabel) */}
+                <div className="flex items-center gap-2 px-2 py-1.5 text-left text-sm">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarFallback className="rounded-lg">
+                      {user?.name
+                        ?.split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">
+                      {user?.name || "John Doe"}
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {user?.email || "john@example.com"}
+                    </span>
                   </div>
-                </DropdownMenuLabel>
+                </div>
+
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+
+                <DropdownMenuItem render={<Link to="/settings" />}>
                   <Settings />
                   Settings
                 </DropdownMenuItem>
+
                 <DropdownMenuItem render={<Link to="/profile" />}>
+                  <Users />
                   Profile
                 </DropdownMenuItem>
+
                 <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut  />
+                  <LogOut />
                   Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -183,5 +196,5 @@ export function AppSidebar() {
 
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }
