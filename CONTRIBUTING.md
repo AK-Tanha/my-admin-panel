@@ -17,3 +17,5 @@ Thank you for considering contributing to this project!
 - Write clear commit messages
 - Test your changes before submitting
 - Update the README if needed
+
+## Support
