@@ -10,6 +10,10 @@ import Profile from "@/pages/Profile"
 import Login from "@/pages/Login"
 import Register from "@/pages/Register"
 import { ProtectedRoute } from "./components/ProtectedRoute"
+import Examples from "@/pages/Examples"
+import Projects from "@/pages/Projects"
+import ProjectDetails from "@/pages/ProjectDetails"
+import Uploads from "@/pages/Uploads"
 
 function App() {
   return (
@@ -25,6 +29,10 @@ function App() {
             <Route path="/documents" element={<Documents />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/examples" element={<Examples />} />
+            <Route path="/Projects" element={<Projects />} />
+            <Route path="/projects/:id" element={<ProjectDetails />} />
+            <Route path="/uploads" element={<Uploads />} />
           </Route>
         </Route>
         {/* Fallback */}

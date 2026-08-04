@@ -13,6 +13,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { DataPagination } from "@/components/ui/data-pagination";
 import {
   Table,
   TableBody,
@@ -45,7 +46,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   MoreHorizontal,
@@ -57,84 +57,92 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-  type User,
-} from "@/lib/api/users";
-import { DataPagination } from "@/components/ui/data-pagination";
+  getProjects,
+  createProject,
+  updateProject,
+  deleteProject,
+  type Project,
+} from "@/lib/api/projects";
+import { Link } from "react-router-dom";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
-// Validation
-const userSchema = z.object({
+const projectSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email"),
-  role: z.string().min(1, "Role is required"),
-  status: z.enum(["Active", "Inactive"]),
+  client: z.string().min(2, "Client is required"),
+  status: z.enum(["Planning", "In Progress", "Completed", "On Hold"]),
+  budget: z.string().min(1, "Budget is required"),
+  deadline: z.string().min(1, "Deadline is required"),
 });
 
-type UserFormValues = z.infer<typeof userSchema>;
+type ProjectFormValues = z.infer<typeof projectSchema>;
 
-export default function Users() {
+const statusVariant: Record<
+  Project["status"],
+  "default" | "secondary" | "outline" | "destructive"
+> = {
+  Planning: "secondary",
+  "In Progress": "default",
+  Completed: "outline",
+  "On Hold": "destructive",
+};
+
+export default function Projects() {
   const queryClient = useQueryClient();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  // Fetch users
-  const { data: users = [], isLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: getUsers,
+  const { data: projects = [], isLoading } = useQuery({
+    queryKey: ["projects"],
+    queryFn: getProjects,
   });
 
-  // Mutations
   const createMutation = useMutation({
-    mutationFn: createUser,
+    mutationFn: createProject,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
       setIsAddOpen(false);
-      toast.success("User added successfully");
+      toast.success("Project created");
     },
-    onError: () => toast.error("Failed to add user"),
+    onError: () => toast.error("Failed to create project"),
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<User> }) =>
-      updateUser(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<Project> }) =>
+      updateProject(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
       setIsEditOpen(false);
-      toast.success("User updated successfully");
+      toast.success("Project updated");
     },
-    onError: () => toast.error("Failed to update user"),
+    onError: () => toast.error("Failed to update project"),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: deleteUser,
+    mutationFn: deleteProject,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
       setIsDeleteOpen(false);
-      toast.success("User deleted successfully");
+      toast.success("Project deleted");
     },
-    onError: () => toast.error("Failed to delete user"),
+    onError: () => toast.error("Failed to delete project"),
   });
 
-  const form = useForm<UserFormValues>({
-    resolver: zodResolver(userSchema),
+  const form = useForm<ProjectFormValues>({
+    resolver: zodResolver(projectSchema),
     defaultValues: {
       name: "",
-      email: "",
-      role: "Viewer",
-      status: "Active",
+      client: "",
+      status: "Planning",
+      budget: "",
+      deadline: "",
     },
   });
 
-  // Columns
-  const columns: ColumnDef<User>[] = [
+  const columns: ColumnDef<Project>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (
@@ -142,56 +150,48 @@ export default function Users() {
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          User
+          Project
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => {
-        const user = row.original;
-        return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>
-                {user.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="font-medium">{user.name}</div>
-              <div className="text-sm text-muted-foreground">{user.email}</div>
-            </div>
+      cell: ({ row }) => (
+        <div>
+          <Link
+            to={`/projects/${row.original.id}`}
+            className="font-medium hover:underline"
+          >
+            {row.original.name}
+          </Link>
+          <div className="text-sm text-muted-foreground">
+            {row.original.client}
           </div>
-        );
-      },
-    },
-    {
-      accessorKey: "role",
-      header: "Role",
+        </div>
+      ),
     },
     {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => (
-        <Badge
-          variant={row.original.status === "Active" ? "default" : "secondary"}
-        >
+        <Badge variant={statusVariant[row.original.status]}>
           {row.original.status}
         </Badge>
       ),
     },
     {
-      accessorKey: "lastLogin",
-      header: "Last Login",
+      accessorKey: "budget",
+      header: "Budget",
+    },
+    {
+      accessorKey: "deadline",
+      header: "Deadline",
       cell: ({ row }) => (
-        <span className="text-muted-foreground">{row.original.lastLogin}</span>
+        <span className="text-muted-foreground">{row.original.deadline}</span>
       ),
     },
     {
       id: "actions",
       cell: ({ row }) => {
-        const user = row.original;
+        const project = row.original;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -204,12 +204,13 @@ export default function Users() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem
                 onClick={() => {
-                  setSelectedUser(user);
+                  setSelectedProject(project);
                   form.reset({
-                    name: user.name,
-                    email: user.email,
-                    role: user.role,
-                    status: user.status,
+                    name: project.name,
+                    client: project.client,
+                    status: project.status,
+                    budget: project.budget,
+                    deadline: project.deadline,
                   });
                   setIsEditOpen(true);
                 }}
@@ -221,7 +222,7 @@ export default function Users() {
               <DropdownMenuItem
                 className="text-destructive"
                 onClick={() => {
-                  setSelectedUser(user);
+                  setSelectedProject(project);
                   setIsDeleteOpen(true);
                 }}
               >
@@ -236,12 +237,9 @@ export default function Users() {
   ];
 
   const table = useReactTable({
-    data: users,
+    data: projects,
     columns,
-    state: {
-      sorting,
-      globalFilter,
-    },
+    state: { sorting, globalFilter },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
@@ -250,62 +248,47 @@ export default function Users() {
     getSortedRowModel: getSortedRowModel(),
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 5,
       },
     },
   });
-
-  const handleAdd = (values: UserFormValues) => {
-    createMutation.mutate(values);
-  };
-
-  const handleEdit = (values: UserFormValues) => {
-    if (!selectedUser) return;
-    updateMutation.mutate({ id: selectedUser.id, data: values });
-  };
-
-  const handleDelete = () => {
-    if (!selectedUser) return;
-    deleteMutation.mutate(selectedUser.id);
-  };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Users</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Projects</h1>
           <p className="text-muted-foreground">
-            Manage your team members and their account permissions.
+            Example CRUD page — same pattern as Users.
           </p>
         </div>
         <Button
           onClick={() => {
             form.reset({
               name: "",
-              email: "",
-              role: "Viewer",
-              status: "Active",
+              client: "",
+              status: "Planning",
+              budget: "",
+              deadline: "",
             });
             setIsAddOpen(true);
           }}
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add User
+          Add Project
         </Button>
       </div>
 
       {/* Search */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search users..."
-            className="pl-8"
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-          />
-        </div>
+      <div className="relative max-w-sm">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search projects..."
+          className="pl-8"
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+        />
       </div>
 
       {/* Table */}
@@ -342,7 +325,7 @@ export default function Users() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No users found.
+                  No projects found.
                 </TableCell>
               </TableRow>
             ) : (
@@ -365,49 +348,62 @@ export default function Users() {
 
       {/* Pagination */}
       <DataPagination
-                  pageIndex={table.getState().pagination.pageIndex}
-                  pageCount={table.getPageCount()}
-                  canPreviousPage={table.getCanPreviousPage()}
-                  canNextPage={table.getCanNextPage()}
-                  totalItems={table.getFilteredRowModel().rows.length}
-                  pageSize={table.getState().pagination.pageSize}
-                  onPageChange={(page) => table.setPageIndex(page)}
-                  onPreviousPage={() => table.previousPage()}
-                  onNextPage={() => table.nextPage()}
-                  onFirstPage={() => table.setPageIndex(0)}
-                  onLastPage={() => table.setPageIndex(table.getPageCount() - 1)}
-                />
+        pageIndex={table.getState().pagination.pageIndex}
+        pageCount={table.getPageCount()}
+        canPreviousPage={table.getCanPreviousPage()}
+        canNextPage={table.getCanNextPage()}
+        totalItems={table.getFilteredRowModel().rows.length}
+        pageSize={table.getState().pagination.pageSize}
+        onPageChange={(page) => table.setPageIndex(page)}
+        onPreviousPage={() => table.previousPage()}
+        onNextPage={() => table.nextPage()}
+        onFirstPage={() => table.setPageIndex(0)}
+        onLastPage={() => table.setPageIndex(table.getPageCount() - 1)}
+      />
 
       {/* Add Dialog */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New User</DialogTitle>
-            <DialogDescription>Create a new user account.</DialogDescription>
+            <DialogTitle>Add Project</DialogTitle>
+            <DialogDescription>Create a new project.</DialogDescription>
           </DialogHeader>
-          <form onSubmit={form.handleSubmit(handleAdd)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit((values) =>
+              createMutation.mutate(values),
+            )}
+            className="space-y-4"
+          >
             <FieldGroup>
               <Field>
-                <FieldLabel>Full Name</FieldLabel>
-                <Input placeholder="John Doe" {...form.register("name")} />
+                <FieldLabel>Name</FieldLabel>
+                <Input {...form.register("name")} />
                 <FieldError>{form.formState.errors.name?.message}</FieldError>
               </Field>
               <Field>
-                <FieldLabel>Email</FieldLabel>
-                <Input
-                  type="email"
-                  placeholder="john@example.com"
-                  {...form.register("email")}
-                />
-                <FieldError>{form.formState.errors.email?.message}</FieldError>
+                <FieldLabel>Client</FieldLabel>
+                <Input {...form.register("client")} />
+                <FieldError>{form.formState.errors.client?.message}</FieldError>
               </Field>
               <Field>
-                <FieldLabel>Role</FieldLabel>
+                <FieldLabel>Status</FieldLabel>
                 <Input
-                  placeholder="Admin / Editor / Viewer"
-                  {...form.register("role")}
+                  placeholder="Planning | In Progress | Completed | On Hold"
+                  {...form.register("status")}
                 />
-                <FieldError>{form.formState.errors.role?.message}</FieldError>
+                <FieldError>{form.formState.errors.status?.message}</FieldError>
+              </Field>
+              <Field>
+                <FieldLabel>Budget</FieldLabel>
+                <Input placeholder="$10,000" {...form.register("budget")} />
+                <FieldError>{form.formState.errors.budget?.message}</FieldError>
+              </Field>
+              <Field>
+                <FieldLabel>Deadline</FieldLabel>
+                <Input type="date" {...form.register("deadline")} />
+                <FieldError>
+                  {form.formState.errors.deadline?.message}
+                </FieldError>
               </Field>
             </FieldGroup>
             <DialogFooter>
@@ -419,7 +415,7 @@ export default function Users() {
                 Cancel
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? "Adding..." : "Add User"}
+                {createMutation.isPending ? "Creating..." : "Create"}
               </Button>
             </DialogFooter>
           </form>
@@ -430,25 +426,43 @@ export default function Users() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>Update user information.</DialogDescription>
+            <DialogTitle>Edit Project</DialogTitle>
+            <DialogDescription>Update project details.</DialogDescription>
           </DialogHeader>
-          <form onSubmit={form.handleSubmit(handleEdit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit((values) => {
+              if (!selectedProject) return;
+              updateMutation.mutate({ id: selectedProject.id, data: values });
+            })}
+            className="space-y-4"
+          >
             <FieldGroup>
               <Field>
-                <FieldLabel>Full Name</FieldLabel>
+                <FieldLabel>Name</FieldLabel>
                 <Input {...form.register("name")} />
                 <FieldError>{form.formState.errors.name?.message}</FieldError>
               </Field>
               <Field>
-                <FieldLabel>Email</FieldLabel>
-                <Input type="email" {...form.register("email")} />
-                <FieldError>{form.formState.errors.email?.message}</FieldError>
+                <FieldLabel>Client</FieldLabel>
+                <Input {...form.register("client")} />
+                <FieldError>{form.formState.errors.client?.message}</FieldError>
               </Field>
               <Field>
-                <FieldLabel>Role</FieldLabel>
-                <Input {...form.register("role")} />
-                <FieldError>{form.formState.errors.role?.message}</FieldError>
+                <FieldLabel>Status</FieldLabel>
+                <Input {...form.register("status")} />
+                <FieldError>{form.formState.errors.status?.message}</FieldError>
+              </Field>
+              <Field>
+                <FieldLabel>Budget</FieldLabel>
+                <Input {...form.register("budget")} />
+                <FieldError>{form.formState.errors.budget?.message}</FieldError>
+              </Field>
+              <Field>
+                <FieldLabel>Deadline</FieldLabel>
+                <Input type="date" {...form.register("deadline")} />
+                <FieldError>
+                  {form.formState.errors.deadline?.message}
+                </FieldError>
               </Field>
             </FieldGroup>
             <DialogFooter>
@@ -460,7 +474,7 @@ export default function Users() {
                 Cancel
               </Button>
               <Button type="submit" disabled={updateMutation.isPending}>
-                {updateMutation.isPending ? "Saving..." : "Save Changes"}
+                {updateMutation.isPending ? "Saving..." : "Save"}
               </Button>
             </DialogFooter>
           </form>
@@ -469,16 +483,16 @@ export default function Users() {
 
       {/* Delete Dialog */}
       <ConfirmDialog
-              open={isDeleteOpen}
-              onOpenChange={setIsDeleteOpen}
-              title="Delete User"
-              description={`Are you sure you want to delete ${selectedUser?.name}?`}
-              confirmText="Delete"
-              loading={deleteMutation.isPending}
-              onConfirm={() => {
-                if (selectedUser) deleteMutation.mutate(selectedUser.id);
-              }}
-            />
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        title="Delete Project"
+        description={`Are you sure you want to delete ${selectedProject?.name}?`}
+        confirmText="Delete"
+        loading={deleteMutation.isPending}
+        onConfirm={() => {
+          if (selectedProject) deleteMutation.mutate(selectedProject.id);
+        }}
+      />
     </div>
   );
 }

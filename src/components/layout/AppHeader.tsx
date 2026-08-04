@@ -18,6 +18,8 @@ const routeNames: Record<string, string> = {
   "/documents": "Documents",
   "/settings": "Settings",
   "/profile": "Profile",
+  "/examples": "Examples",
+  "/product": "Product",
 }
 
 export function AppHeader() {

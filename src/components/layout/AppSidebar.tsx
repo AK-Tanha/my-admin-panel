@@ -19,6 +19,10 @@ import {
   BarChart3,
   LogOut,
   ChevronsUpDown,
+  Upload,
+  FolderKanban,
+  SwatchBook,
+  UserRoundPen,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -60,7 +64,22 @@ const menuItems = [
   {
     title: "Profile",
     url: "/profile",
-    icon: Users,
+    icon: UserRoundPen,
+  },
+  {
+    title: "Examples",
+    url: "/examples",
+    icon: SwatchBook,
+  },
+  {
+    title: "Projects",
+    url: "/Projects",
+    icon: FolderKanban,
+  },
+  {
+    title: "Uploads",
+    url: "/uploads",
+    icon: Upload,
   },
 ];
 

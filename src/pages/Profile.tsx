@@ -1,26 +1,28 @@
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field"
-import { Mail, MapPin, Phone, Calendar, Shield } from "lucide-react"
-import { toast } from "sonner"
+} from "@/components/ui/field";
+import { Mail, MapPin, Phone, Calendar, Shield } from "lucide-react";
+import { toast } from "sonner";
+import { FileDropzone, type DropzoneFile } from "@/components/ui/file-dropzone";
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -32,9 +34,9 @@ const profileSchema = z.object({
     .regex(/^[+]?[\d\s\-()]+$/, "Please enter a valid phone number"),
   location: z.string().min(2, "Location is required"),
   bio: z.string().max(200, "Bio must be less than 200 characters").optional(),
-})
+});
 
-type ProfileFormValues = z.infer<typeof profileSchema>
+type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function Profile() {
   const form = useForm<ProfileFormValues>({
@@ -47,12 +49,15 @@ export default function Profile() {
       location: "New York, USA",
       bio: "Full-stack developer and admin panel enthusiast.",
     },
-  })
+  });
+
 
   function onSubmit(values: ProfileFormValues) {
-    console.log(values)
-    toast.success("Profile updated successfully!")
+    console.log(values);
+    toast.success("Profile updated successfully!");
   }
+  const [avatar, setAvatar] = useState<DropzoneFile[]>([]);
+  const avatarPreview = avatar[0]?.preview;
 
   return (
     <div className="space-y-6">
@@ -68,7 +73,7 @@ export default function Profile() {
         <Card className="lg:col-span-1">
           <CardHeader className="items-center text-center">
             <Avatar className="h-24 w-24">
-              <AvatarImage src="" alt="John Doe" />
+              <AvatarImage src={avatarPreview || ""} alt="John Doe" />
               <AvatarFallback className="text-2xl">JD</AvatarFallback>
             </Avatar>
             <div className="space-y-1">
@@ -122,32 +127,42 @@ export default function Profile() {
                   <Field>
                     <FieldLabel>First Name</FieldLabel>
                     <Input {...form.register("firstName")} />
-                    <FieldError>{form.formState.errors.firstName?.message}</FieldError>
+                    <FieldError>
+                      {form.formState.errors.firstName?.message}
+                    </FieldError>
                   </Field>
 
                   <Field>
                     <FieldLabel>Last Name</FieldLabel>
                     <Input {...form.register("lastName")} />
-                    <FieldError>{form.formState.errors.lastName?.message}</FieldError>
+                    <FieldError>
+                      {form.formState.errors.lastName?.message}
+                    </FieldError>
                   </Field>
                 </div>
 
                 <Field>
                   <FieldLabel>Email</FieldLabel>
                   <Input type="email" {...form.register("email")} />
-                  <FieldError>{form.formState.errors.email?.message}</FieldError>
+                  <FieldError>
+                    {form.formState.errors.email?.message}
+                  </FieldError>
                 </Field>
 
                 <Field>
                   <FieldLabel>Phone</FieldLabel>
                   <Input {...form.register("phone")} />
-                  <FieldError>{form.formState.errors.phone?.message}</FieldError>
+                  <FieldError>
+                    {form.formState.errors.phone?.message}
+                  </FieldError>
                 </Field>
 
                 <Field>
                   <FieldLabel>Location</FieldLabel>
                   <Input {...form.register("location")} />
-                  <FieldError>{form.formState.errors.location?.message}</FieldError>
+                  <FieldError>
+                    {form.formState.errors.location?.message}
+                  </FieldError>
                 </Field>
 
                 <Field>
@@ -155,6 +170,15 @@ export default function Profile() {
                   <Input {...form.register("bio")} />
                   <FieldError>{form.formState.errors.bio?.message}</FieldError>
                 </Field>
+                <FileDropzone
+                  value={avatar}
+                  onChange={setAvatar}
+                  maxFiles={1}
+                  multiple={false}
+                  accept={{ "image/*": [".png", ".jpg", ".jpeg", ".webp"] }}
+                  label="Change avatar"
+                  description="Square image recommended"
+/>
               </FieldGroup>
 
               <div className="flex justify-end gap-2">
@@ -172,5 +196,5 @@ export default function Profile() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

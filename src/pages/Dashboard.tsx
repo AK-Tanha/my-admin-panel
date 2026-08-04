@@ -158,9 +158,9 @@ export default function Dashboard() {
                   <Area
                     type="monotone"
                     dataKey="revenue"
-                    stroke="var(--color-revenue)"
-                    fill="var(--color-revenue)"
-                    fillOpacity={0.2}
+                    stroke="var(--chart-6)"
+                    fill="var(--chart-7)"
+                    fillOpacity={0.5}
                   />
                 </AreaChart>
               </ChartContainer>
@@ -191,7 +191,7 @@ export default function Dashboard() {
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Bar
                     dataKey="users"
-                    fill="var(--color-users)"
+                    fill="var(--chart-6)"
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
